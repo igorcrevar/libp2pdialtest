@@ -24,6 +24,7 @@ type dialParams struct {
 	privateKey    string
 	dialAfter     time.Duration
 	timeToLive    time.Duration
+	closeConnTime time.Duration
 	dialAddress   string
 	closeInbound  bool
 	closeOutbound bool
@@ -58,7 +59,8 @@ func executeServer(address string, params dialParams) {
 		"--dial-after="+params.dialAfter.String(),
 		"--time-to-live="+params.timeToLive.String(),
 		"--close-inbound="+strconv.FormatBool(params.closeInbound),
-		"--close-outbound="+strconv.FormatBool(params.closeOutbound))
+		"--close-outbound="+strconv.FormatBool(params.closeOutbound),
+		"--close-conn-time="+params.closeConnTime.String())
 	output, err := executeCommand(cmd)
 	peerId := address[strings.LastIndex(address, "/")+1:]
 	if err == nil {
@@ -100,6 +102,7 @@ func main() {
 			dialAddress:   maAddress2,
 			timeToLive:    time.Second * 10,
 			dialAfter:     time.Millisecond * 1000,
+			closeConnTime: time.Millisecond * 300,
 			closeInbound:  false,
 			closeOutbound: true,
 		})
@@ -112,6 +115,7 @@ func main() {
 			dialAddress:   maAddress1,
 			timeToLive:    time.Second * 10,
 			dialAfter:     time.Millisecond * 1000,
+			closeConnTime: time.Millisecond * 300,
 			closeInbound:  false,
 			closeOutbound: false,
 		})

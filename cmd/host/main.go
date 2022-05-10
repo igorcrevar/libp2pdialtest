@@ -12,6 +12,7 @@ type Configuration struct {
 	port             int
 	dialAfter        time.Duration
 	timeToLive       time.Duration
+	closeConnTime    time.Duration
 	printAddress     bool
 	dialMultiaddress string
 	privateKeyString string
@@ -25,6 +26,7 @@ func main() {
 	flag.StringVar(&config.privateKeyString, "pk", "", "private key")
 	flag.DurationVar(&config.dialAfter, "dial-after", 0, "dial after")
 	flag.DurationVar(&config.timeToLive, "time-to-live", 0, "time to live")
+	flag.DurationVar(&config.closeConnTime, "close-conn-time", 0, "close connection sleep time")
 	flag.BoolVar(&config.printAddress, "print-address", false, "print address")
 	flag.BoolVar(&config.closeInbound, "close-inbound", false, "close inbound connection")
 	flag.BoolVar(&config.closeOutbound, "close-outbound", false, "close outbound connection")
@@ -59,6 +61,7 @@ func main() {
 		Port:          config.port,
 		CloseInbound:  config.closeInbound,
 		CloseOutbound: config.closeOutbound,
+		CloseConnTime: config.closeConnTime,
 	})
 	if err != nil {
 		fmt.Println(err)

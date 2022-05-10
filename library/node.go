@@ -21,6 +21,7 @@ type NodeConfig struct {
 	PrivateKey    libp2pcrypto.PrivKey
 	CloseInbound  bool
 	CloseOutbound bool
+	CloseConnTime time.Duration
 }
 
 type node struct {
@@ -52,10 +53,10 @@ func NewNode(config NodeConfig) (*node, error) {
 
 			if (conn.Stat().Direction == network.DirInbound && config.CloseInbound) ||
 				(conn.Stat().Direction == network.DirOutbound && config.CloseOutbound) {
-				Log("ConnectedF closing the connection - peer = %s, direction = %s, connId = %s",
-					conn.RemotePeer(), conn.Stat().Direction, conn.ID())
 				go func() {
-					time.Sleep(time.Millisecond * 1000)
+					time.Sleep(config.CloseConnTime)
+					Log("ConnectedF closing the connection - peer = %s, direction = %s, connId = %s",
+						conn.RemotePeer(), conn.Stat().Direction, conn.ID())
 					conn.Close()
 				}()
 			}
