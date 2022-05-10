@@ -50,7 +50,7 @@ func getAddress(port int, privateKey string) (string, error) {
 	return executeCommand(cmd)
 }
 
-func dial(params dialParams) (string, error) {
+func executeServer(address string, params dialParams) {
 	cmd := exec.Command(executable,
 		"--port="+strconv.Itoa(params.port),
 		"--pk="+params.privateKey,
@@ -59,7 +59,13 @@ func dial(params dialParams) (string, error) {
 		"--time-to-live="+params.timeToLive.String(),
 		"--close-inbound="+strconv.FormatBool(params.closeInbound),
 		"--close-outbound="+strconv.FormatBool(params.closeOutbound))
-	return executeCommand(cmd)
+	output, err := executeCommand(cmd)
+	peerId := address[strings.LastIndex(address, "/")+1:]
+	if err == nil {
+		fmt.Printf("\nNode = %s output:\n%s", peerId, string(output))
+	} else {
+		fmt.Printf("\nNode = %s output:\nerror = %v\n", peerId, err)
+	}
 }
 
 func main() {
@@ -88,43 +94,27 @@ func main() {
 	wg := sync.WaitGroup{}
 	wg.Add(2)
 	go func() {
-		output, err := dial(dialParams{
+		executeServer(maAddress1, dialParams{
 			port:          port1,
 			privateKey:    privateKey1,
 			dialAddress:   maAddress2,
-			timeToLive:    time.Second * 4,
-			dialAfter:     time.Millisecond * 1010,
+			timeToLive:    time.Second * 10,
+			dialAfter:     time.Millisecond * 1000,
 			closeInbound:  false,
-			closeOutbound: false,
+			closeOutbound: true,
 		})
-		fmt.Println()
-		fmt.Printf("%s output: \n", maAddress1[strings.LastIndex("/", maAddress1)+1:])
-		if err == nil {
-			fmt.Print(string(output))
-		} else {
-			fmt.Println(err)
-		}
-
 		wg.Done()
 	}()
 	go func() {
-		output, err := dial(dialParams{
+		executeServer(maAddress2, dialParams{
 			port:          port2,
 			privateKey:    privateKey2,
 			dialAddress:   maAddress1,
-			timeToLive:    time.Second * 4,
+			timeToLive:    time.Second * 10,
 			dialAfter:     time.Millisecond * 1000,
 			closeInbound:  false,
 			closeOutbound: false,
 		})
-		fmt.Println()
-		fmt.Printf("%s output: \n", maAddress2[strings.LastIndex("/", maAddress2)+1:])
-		if err == nil {
-			fmt.Print(string(output))
-		} else {
-			fmt.Println(err)
-		}
-
 		wg.Done()
 	}()
 

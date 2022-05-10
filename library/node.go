@@ -3,6 +3,7 @@ package library
 import (
 	"context"
 	"fmt"
+	"time"
 
 	"github.com/libp2p/go-libp2p"
 	libp2pcrypto "github.com/libp2p/go-libp2p-core/crypto"
@@ -53,7 +54,10 @@ func NewNode(config NodeConfig) (*node, error) {
 				(conn.Stat().Direction == network.DirOutbound && config.CloseOutbound) {
 				Log("ConnectedF closing the connection - peer = %s, direction = %s, connId = %s",
 					conn.RemotePeer(), conn.Stat().Direction, conn.ID())
-				conn.Close()
+				go func() {
+					time.Sleep(time.Millisecond * 1000)
+					conn.Close()
+				}()
 			}
 		},
 		DisconnectedF: func(n network.Network, conn network.Conn) {
